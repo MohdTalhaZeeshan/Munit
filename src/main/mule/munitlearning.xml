@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="79308049-f19a-4faf-bf0b-ee7435a02bbe" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="423487cb-b5c9-4892-b01d-e0c05294fc71" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="12345" database="poc-1" />
+	</db:config>
+	<db:config name="Database_Config1" doc:name="Database Config" doc:id="14fcd4d7-8da3-44c2-97b6-5a93188a881f" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="12345" database="poc-1" />
+	</db:config>
+	<flow name="munitlearningFlow" doc:id="b7439831-5c66-48ce-a726-dfa3ca0bcebf" >
+		<http:listener doc:name="Listener" doc:id="215c1e7b-8a82-496a-957e-b716bc3e2eca" config-ref="HTTP_Listener_config" path="/test"/>
+		<logger level="INFO" doc:name="Logger" doc:id="8c0eaeb2-b07f-4c4f-a59b-1032185948fd" message='#["Start Logger"]'/>
+		<db:select doc:name="Select" doc:id="d188fc6d-cb2d-453a-81f8-d2cb5f3d0b43" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM DOCTOR;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="9e109674-fb1d-4377-8877-589bc4bca471" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="Passing-Payload" doc:id="f58010ed-72a1-49aa-a372-cdbf52ea599c" >
+		<http:listener doc:name="Listener" doc:id="a55e2347-66a9-481e-b840-552691f7dda1" config-ref="HTTP_Listener_config" path="/munit"/>
+		<logger level="INFO" doc:name="Logger" doc:id="b292e663-c1b0-4f23-a5dc-3c12265ff1b2" message='#["Start The Logger"]'/>
+		<ee:transform doc:name="Transform Message" doc:id="db082e1b-328a-414c-8aa0-2624eba9828d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+        "Name": payload.Name,
+        "StaffID": payload.StaffID
+}
+        ]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="originalPayload" ><![CDATA[payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<db:insert doc:name="Insert" doc:id="40453009-1df8-4fc1-b2de-f63cd29d39e3" config-ref="Database_Config1">
+			<db:sql ><![CDATA[INSERT INTO DOCTOR (
+    staffID,
+    Name,
+    Gender,
+    EmailID,
+    SpecialistIN,
+    AcceptingCases,
+    Surgeon,
+    OfficeHours,
+    Timestamp
+)
+VALUES (
+    :staffID,
+    :Name,
+    :Gender,
+    :EmailID,
+    :SpecialistIN,
+    :AcceptingCases,
+    :Surgeon,
+    :OfficeHours,
+    CURRENT_TIMESTAMP
+);
+  
+
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"Name" : vars.originalPayload.Name, 
+	"Gender":vars.originalPayload.Gender, 
+	"EmailID" : vars.originalPayload.EmailID, 
+	"SpecialistIN" : vars.originalPayload.Specialty, 
+	"AcceptingCases" : vars.originalPayload.AcceptingCases, 
+	"Surgeon" : vars.originalPayload.Surgeon, 
+	"OfficeHours" : vars.originalPayload.OfficeHours, 
+	"staffID" :vars.originalPayload.StaffID
+
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="74c7fc6f-d5b9-4722-b6fa-b0d10c6f69a3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message" : "Record Inserted Successfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

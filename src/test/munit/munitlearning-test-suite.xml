@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="munitlearning-test-suite.xml" />
+	<munit:test name="munitlearning-test-suite-munitlearningFlowTest" doc:id="7c5d53a4-5918-4d99-9695-7f622cb545c0" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="24bb6353-fbdf-4fc7-aac6-510d8e37b573" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d188fc6d-cb2d-453a-81f8-d2cb5f3d0b43" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to munitlearningFlow" doc:id="4eaac7bc-3f06-48a9-ac3b-7531091bce1a" name="munitlearningFlow"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="munitlearning-test-suite-Passing-PayloadTest" doc:id="eb7aa383-cb97-4bee-94f4-d1b5d4d76ef3" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="4f5369b9-1d76-4789-9600-d2e04528e229" processor="db:insert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="40453009-1df8-4fc1-b2de-f63cd29d39e3" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="16ac2483-6d20-4132-a282-693cbf55a344" >
+				<munit:payload value='#[{&#10;        "Name": "Ramesh",&#10;        "StaffID": 1234,&#10;        "Gender": "Male",&#10;        "EmailID": "ramesh@gmail.com",&#10;        "Specialty": "Neurology",&#10;        "AcceptingCases": "Only Outpatient",&#10;        "Surgeon": "No",&#10;        "OfficeHours": "10:00:00",&#10;        "Timestamp": "2024-09-17T12:57:35Z"&#10;    }]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to Passing-Payload" doc:id="ca8e8419-100b-47b0-811d-85777da65a2d" name="Passing-Payload"/>
+		</munit:execution>
+	</munit:test>
+
+
+</mule>
